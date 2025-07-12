@@ -59,6 +59,22 @@ proc writeSourceFile(filename: string, content: string) =
   writeFile(sourceFile, content)
   echo "Generated source file: " & sourceFile
 
+proc checkCrossCompilationSupport(targetOS: string): bool =
+  if targetOS == "windows":
+    # Check if MinGW cross-compilation toolchain is available
+    let (_, mingwExitCode) = execCmdEx("which x86_64-w64-mingw32-gcc")
+    if mingwExitCode != 0:
+      echo "ERROR: Windows cross-compilation requires MinGW-w64 toolchain."
+      echo "Please install it using:"
+      echo "  Ubuntu/Debian: sudo apt-get install mingw-w64"
+      echo "  Fedora/RHEL: sudo dnf install mingw64-gcc"
+      echo "  Arch Linux: sudo pacman -S mingw-w64-gcc"
+      echo ""
+      echo "After installation, you may also need to configure Nim to use MinGW:"
+      echo "  nim c --os:windows --gcc.exe:x86_64-w64-mingw32-gcc --gcc.linkerexe:x86_64-w64-mingw32-gcc --out:" & "output" / "filename.exe" & " source.nim"
+      return false
+  return true
+
 proc compileExecutable(filename: string, targetOS: string) =
   let sourceFile = "output" / (filename & ".nim")
   let outputFile = if targetOS == "windows":
@@ -66,12 +82,22 @@ proc compileExecutable(filename: string, targetOS: string) =
   else:
     "output" / filename
 
+  # Check cross-compilation support
+  if not checkCrossCompilationSupport(targetOS):
+    echo "Skipping compilation due to missing cross-compilation toolchain."
+    echo "Source file generated: " & sourceFile
+    echo "You can compile it manually on a Windows system or after installing the required toolchain."
+    return
+
   # Determine cross-compilation flags
   let osFlag = if targetOS == "windows": "--os:windows" else: "--os:linux"
   let cpuFlag = "--cpu:amd64"
 
-  # Compile command
-  let compileCmd = "nim c " & osFlag & " " & cpuFlag & " --out:" & outputFile & " " & sourceFile
+  # For Windows cross-compilation, use MinGW if available
+  let compileCmd = if targetOS == "windows":
+    "nim c " & osFlag & " " & cpuFlag & " --gcc.exe:x86_64-w64-mingw32-gcc --gcc.linkerexe:x86_64-w64-mingw32-gcc --out:" & outputFile & " " & sourceFile
+  else:
+    "nim c " & osFlag & " " & cpuFlag & " --out:" & outputFile & " " & sourceFile
 
   echo "Compiling for " & targetOS & "..."
   echo "Command: " & compileCmd
