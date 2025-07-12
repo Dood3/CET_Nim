@@ -67,8 +67,6 @@ proc checkCrossCompilationSupport(targetOS: string): bool =
       echo "ERROR: Windows cross-compilation requires MinGW-w64 toolchain."
       echo "Install using:"
       echo "  Ubuntu/Debian: sudo apt-get install mingw-w64"
-      echo "  Fedora/RHEL: sudo dnf install mingw64-gcc"
-      echo "  Arch Linux: sudo pacman -S mingw-w64-gcc"
       echo ""
       echo "After installation, you may also need to configure Nim to use MinGW:"
       echo "  nim c --os:windows --gcc.exe:x86_64-w64-mingw32-gcc --gcc.linkerexe:x86_64-w64-mingw32-gcc --out:" & "output" / "filename.exe" & " source.nim"
