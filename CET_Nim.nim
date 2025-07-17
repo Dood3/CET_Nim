@@ -1,5 +1,11 @@
 # Build with:
-# 'nim c --out:command_embedder command_embedder.nim'
+# nim c myscript.nim
+# nim c -d:release myscript.nim
+# nim c -d:release -d:danger --opt:size --passC:-flto --passL:-s myscript.nim
+# (-d:danger disables overflow checks, etc.)
+# nim c --out:command_embedder command_embedder.nim
+# nim c --cpu:amd64 --os:windows -o:myprogram.exe myscript.nim
+# nim c --cpu:amd64 --os:windows -d:release -o:myprog.exe myscript.nim
 
 import os, strutils, osproc
 
@@ -32,7 +38,7 @@ proc getOutputFilename(): string =
 
 proc generateNimCode(command: string, targetOS: string): string =
   let execCommand = if targetOS == "windows":
-    "execProcess(\"cmd\", args = [\"/C\", " & command & "], options = {poUsePath})"
+    "execProcess(\"cmd\", args = [\"/C\", \"\"" & command & "\"\"], options = {poUsePath})"
   else:
     "execProcess(\"sh\", args = [\"-c\", \"\"\"" & command & "\"\"\"], options = {poUsePath})"
 
