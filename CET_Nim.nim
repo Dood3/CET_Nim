@@ -15,7 +15,7 @@ proc getUserInput(prompt: string): string =
   return stdin.readLine().strip()
 
 proc selectTargetOS(): string =
-  echo "=== Command Embedder Tool - Nim Version ==="
+  echo "=== Command Embedder Tool (Nim) ==="
   echo "Select target operating system:"
   echo "1. Windows"
   echo "2. Linux"
